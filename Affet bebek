@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Barışalım mı?</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 {
+    color: #222;
+    font-size: 3rem;
+    margin-bottom: 40px;
+    user-select: none;
+  }
+  #message {
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #bb2964;
+    text-align: center;
+    min-height: 100px;
+    user-select: none;
+  }
+  .btn-container {
+    display: flex;
+    gap: 40px;
+  }
+  button {
+    font-size: 1.8rem;
+    padding: 15px 50px;
+    border-radius: 15px;
+    cursor: pointer;
+    border: none;
+    user-select: none;
+    min-width: 130px;
+    min-height: 60px;
+    transition: transform 0.5s ease;
+  }
+  #yesBtn {
+    background-color: #00c853; /* yemyeşil */
+    color: white;
+  }
+  #noBtn {
+    background-color: #e53935; /* kırmızı */
+    color: white;
+  }
+  #noBtn:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  /* Kalp animasyonu */
+  .heart {
+    position: fixed;
+    font-size: 24px;
+    animation: flyUp 2s forwards;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1000;
+  }
+  @keyframes flyUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-150px) scale(1.5);
+    }
+  }
+
+  /* Giriş ekranı stilleri */
+  #loginScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #loginPrompt {
+    font-size: 2.5rem;
+    color: #222;
+    user-select: none;
+    margin-bottom: 5px;
+  }
+  #passwordInput {
+    font-size: 1.5rem;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 2px solid #bb2964;
+    outline: none;
+    margin-bottom: 15px;
+    width: 220px;
+    text-align: center;
+  }
+  #loginBtn {
+    background-color: #00c853;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+    padding: 10px 40px;
+    font-size: 1.5rem;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #loginBtn:hover {
+    background-color: #009624;
+  }
+  #loginInfo {
+    margin-top: 20px;
+    color: #bb2964;
+    font-size: 1.2rem;
+    user-select: none;
+    text-align: center;
+    min-height: 1.5em;
+  }
+</style>
+</head>
+<body>
+
+<!-- Giriş Ekranı -->
+<div id="loginScreen">
+  <div id="loginPrompt">Şifre?</div>
+  <div style="color:#bb2964; font-size:1.2rem; user-select:none; margin-bottom: 15px;">3 deneme hakkınız var</div>
+  <input type="password" id="passwordInput" placeholder="Şifreyi gir" autocomplete="off" />
+  <button id="loginBtn">Giriş</button>
+  <div id="loginInfo"></div>
+</div>
+
+<!-- Ana Sayfa (başlangıçta gizli) -->
+<div id="mainContent" style="display:none; flex-direction: column; align-items: center;">
+
+  <h1>Barışalım mı?</h1>
+  <div id="message">Lütfen cevabını seç :)</div>
+  <div class="btn-container">
+    <button id="yesBtn">Evet</button>
+    <button id="noBtn">Hayır</button>
+  </div>
+
+</div>
+
+<script>
+  // Giriş ekranı elemanları
+  const loginScreen = document.getElementById('loginScreen');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginInfo = document.getElementById('loginInfo');
+
+  // Ana sayfa elemanları
+  const mainContent = document.getElementById('mainContent');
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const message = document.getElementById('message');
+
+  let loginAttempts = 0;
+  let noCount = 0;
+  let yesCount = 0;
+  let yesScale = 1;  // Büyüme için ölçek
+
+  const noMessages = [
+    "Hadi ama bir daha düşün!",
+    "Yeterince düşündün mü?",
+    "Seni çok seviyorum 💖",
+    "Bana başka şans bırakmadın, seni çok seviyorum aşkım! 🥰"
+  ];
+
+  const yesMessages = [
+    "Bende seni çok özledim 🥺<br>Evlen benimle 💖➡️",
+    "Seni çok özlemiştim bebeğim! 💕",
+    "Seni bırakabilcegimimi sandın! 💞",
+    "Bir an benden vazgeçtin sandım! 😅",
+    "Seni çok seviyorum aşkım, senden asla vazgeçemem! ❤️"
+  ];
+
+  // Giriş butonu kontrolü
+  loginBtn.addEventListener('click', () => {
+    const pass = passwordInput.value.trim();
+    if(pass === 'samsun pidem') {
+      // Giriş başarılı
+      loginScreen.style.display = 'none';
+      mainContent.style.display = 'flex';
+    } else {
+      loginAttempts++;
+      if(loginAttempts === 1) {
+        loginInfo.textContent = "Lütfen aşkım biraz daha düşün.";
+      } else if(loginAttempts === 2) {
+        loginInfo.textContent = "Aşkım şifreyi bana sor, sadece 3 deneme hakkımız var.";
+      } else if(loginAttempts >= 3) {
+        // 3 deneme hakkı bitti
+        loginScreen.innerHTML = '<div style="font-size:2rem; color:#bb2964; user-select:none; text-align:center; padding: 20px;">Beni bir kere öpersen nasıl siteye gireceğimizi anlatırım.</div>';
+      }
+    }
+    passwordInput.value = '';
+    passwordInput.focus();
+  });
+
+  function showMessage(text) {
+    message.innerHTML = text;
+  }
+
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    const hearts = ['❤️', '💖', '💗', '💞', '💕'];
+    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+
+    const rect = yesBtn.getBoundingClientRect();
+    heart.style.left = (rect.left + rect.width / 2) + 'px';
+    heart.style.top = (rect.top - 10) + 'px';
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+      heart.remove();
+    }, 2000);
+  }
+
+  yesBtn.addEventListener('click', () => {
+    yesCount++;
+
+    // Her evet tıklamada 5 x yesCount kalp çıkacak
+    for(let i = 0; i < 5 * yesCount; i++) {
+      setTimeout(createHeart, i * 100);
+    }
+
+    if (noCount === 0) {
+      showMessage(yesMessages[0]);
+    } else {
+      if (noCount >= 1 && noCount <= 3) {
+        showMessage(yesMessages[noCount]);
+      } else if (noCount >= 4) {
+        showMessage(yesMessages[4]);
+      }
+    }
+
+    // Evet'e basıldıktan sonra Hayır butonunu devre dışı bırak
+    noBtn.disabled = true;
+  });
+
+  noBtn.addEventListener('click', () => {
+    if (noBtn.disabled) return; // Eğer pasifse hiçbir şey yapma
+
+    if (noCount < 4) {
+      showMessage(noMessages[noCount]);
+      noCount++;
+
+      yesScale += 0.1;
+      yesBtn.style.transform = `scale(${yesScale})`;
+
+      if (noCount === 4) {
+        noBtn.style.display = 'none';
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
